@@ -2,29 +2,51 @@
   import { onMount } from 'svelte';
   let currentWord = '';
   let validWords = [];
+  let validationError;
   const mainLetter = 'k';
   const letters = ['a','l', 'b', 'o', 'm','s'];
   const allLetters = letters.concat([mainLetter]);
-  const handleLetterClick = (letter) => () => {
+
+  const addLetter = (letter) => {
+    if (validationError) {
+      validationError = '';
+      currentWord = letter;
+      return;
+    }
+
     currentWord = currentWord + letter;
   };
 
-  const isValidWord = (word) => {
-    return word.length > 2 && word.indexOf(mainLetter) !== -1;
-  }
+  const handleLetterClick = (letter) => () => addLetter(letter);
 
-  const handleSubmit = () => {
-    if (isValidWord(currentWord)) {
-      validWords = validWords.concat([currentWord]);
+  const validateWord = (word) => {
+    if (word.length < 3) {
+      return 'För kort';
     }
 
-    currentWord = '';
+    if (word.indexOf(mainLetter) === -1) {
+      return `Saknar bokstaven ${mainLetter.toUpperCase()}`;
+    }
+
+    if (validWords.indexOf(word) !== -1) {
+      return 'Redan hittat';
+    }
+
+    return undefined;
+  };
+
+  const handleSubmit = () => {
+    validationError = validateWord(currentWord);
+    if (!validationError) {
+      validWords = validWords.concat([currentWord]);
+      currentWord = '';
+    }
   };
 
   onMount(() => {
     document.body.addEventListener('keydown', (e) => {
       if (allLetters.indexOf(e.key.toLowerCase()) !== -1) {
-        currentWord = currentWord + e.key.toLowerCase();
+        addLetter(e.key.toLowerCase());
         return;
       }
 
@@ -42,6 +64,24 @@
 </script>
 
 <style>
+  @keyframes shake {
+    10%, 90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+
+    20%, 80% {
+      transform: translate3d(2px, 0, 0);
+    }
+
+    30%, 50%, 70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+
+    40%, 60% {
+      transform: translate3d(4px, 0, 0);
+    }
+  }
+
   .letter-box {
     width: 278px;
     margin: auto;
@@ -53,6 +93,16 @@
     height: 40px;
     font-size: 30px;
     text-align: center;
+  }
+
+  .current-word--error {
+    animation: shake 0.6s linear;
+  }
+
+  .validation-error {
+    height: 20px;
+    text-align: center;
+    color: red;
   }
 
   .letter {
@@ -110,6 +160,10 @@
     margin-left: -10px;
   }
 
+  .valid-word {
+    display: inline-block;
+  }
+
   .valid-word::after {
     content: "\00B7";
     margin: 10px;
@@ -121,7 +175,8 @@
 </style>
 
 <div class="letter-box">
-  <div class="current-word">{currentWord}</div>
+  <div class="validation-error">{validationError || ''}</div>
+  <div class="current-word {validationError && 'current-word--error'}">{currentWord}</div>
   {#each letters as letter, index}
     <div on:click={handleLetterClick(letter)} class="letter letter--{index}">{letter}</div>
     {#if index === 2}
