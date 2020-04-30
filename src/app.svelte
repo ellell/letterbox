@@ -1,9 +1,10 @@
 <script>
+  import { onMount } from 'svelte';
   let currentWord = '';
   let validWords = [];
   const mainLetter = 'k';
   const letters = ['a','l', 'b', 'o', 'm','s'];
-
+  const allLetters = letters.concat([mainLetter]);
   const handleLetterClick = (letter) => () => {
     currentWord = currentWord + letter;
   };
@@ -19,6 +20,25 @@
 
     currentWord = '';
   };
+
+  onMount(() => {
+    document.body.addEventListener('keydown', (e) => {
+      if (allLetters.indexOf(e.key.toLowerCase()) !== -1) {
+        currentWord = currentWord + e.key.toLowerCase();
+        return;
+      }
+
+      if (e.code === 'Backspace') {
+        currentWord = currentWord.slice(0, -1);
+        return;
+      }
+
+      if (e.code === 'Enter') {
+        handleSubmit();
+        return;
+      }
+    });
+  });
 </script>
 
 <style>
