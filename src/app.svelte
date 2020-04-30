@@ -1,10 +1,12 @@
 <script>
+  import { flip } from 'svelte/animate';
   import { onMount } from 'svelte';
   let currentWord = '';
   let validWords = [];
   let validationError;
   const mainLetter = 'k';
-  const letters = ['a','l', 'b', 'o', 'm','s'];
+
+  let letters = ['a','l', 'b', 'o', 'm','s'];
   const allLetters = letters.concat([mainLetter]);
 
   const addLetter = (letter) => {
@@ -42,6 +44,10 @@
       currentWord = '';
     }
   };
+
+  const handleScramble = () => {
+    letters = letters.sort(() => Math.random() - 0.5);
+  }
 
   onMount(() => {
     document.body.addEventListener('keydown', (e) => {
@@ -91,6 +97,8 @@
   .letter-box {
     position: relative;
     text-align: center;
+    max-width: 258px;
+    margin: 60px auto;
   }
 
   .letter-box:before {
@@ -142,24 +150,25 @@
     display: inline-block;
     position: relative;
     border-radius: 100%;
+    position: relative;
   }
 
   .letter--1 {
-    top: -6px;
+    top: -50px;
   }
 
   .letter--4 {
-    bottom: -6px;
+    bottom: -50px;
   }
 
   .letter--0,
   .letter--2 {
-    bottom: -34px;
+    bottom: 4px;
   }
 
   .letter--3,
   .letter--5 {
-    bottom: 34px;
+    bottom: -4px;
   }
 
   .letter--main {
@@ -168,6 +177,10 @@
     color: #fff;
     display: block;
     margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .button-group, .valid-words {
@@ -184,7 +197,6 @@
     outline: none;
     padding: 10px 20px;
     color: #222;
-    margin-left: -10px;
   }
 
   .valid-word {
@@ -205,15 +217,14 @@
   <div class="validation-error">{validationError || ''}</div>
   <div class="current-word {validationError && 'current-word--error'}">{currentWord}</div>
   <div class="letter-box">
-    {#each letters as letter, index}
-      <div on:click={handleLetterClick(letter)} class="letter letter--{index}">{letter}</div>
-      {#if index === 2}
-        <div on:click={handleLetterClick(mainLetter)} class="letter letter--main">{mainLetter}</div>
-      {/if}
+    <div on:click={handleLetterClick(mainLetter)} class="letter letter--main">{mainLetter}</div>
+    {#each letters as letter, index (letter)}
+      <div animate:flip="{{ duration: 800 }}" on:click={handleLetterClick(letter)} class="letter letter--{index}">{letter}</div>
     {/each}
   </div>
-  <div on:click={handleSubmit} class="button-group">
-    <button>skicka</button>
+  <div class="button-group">
+    <button on:click={handleScramble}>skramla</button>
+    <button on:click={handleSubmit}>skicka</button>
   </div>
   <div class="valid-words">
     {#each validWords as word}
