@@ -8,8 +8,9 @@
 
   let letters = ['a','l', 'b', 'o', 'm','s'];
   const allLetters = letters.concat([mainLetter]);
-
+  let lastActiveLetter;
   const addLetter = (letter) => {
+    lastActiveLetter = letter;
     if (validationError) {
       validationError = '';
       currentWord = letter;
@@ -88,6 +89,16 @@
     }
   }
 
+  @keyframes scale {
+    0%, 100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.1);
+    }
+  }
+
   .word-box {
     margin: auto;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
@@ -153,6 +164,10 @@
     position: relative;
   }
 
+  .letter--active {
+    animation: scale 0.4s ease;
+  }
+
   .letter--1 {
     top: -50px;
   }
@@ -178,9 +193,10 @@
     display: block;
     margin: auto;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: calc(50% - 10px);
+    left: calc(50% - 10px);
+    width: 20px;
+    line-height: 20px;
   }
 
   .button-group, .valid-words {
@@ -197,6 +213,12 @@
     outline: none;
     padding: 10px 20px;
     color: #222;
+    background-color: transparent;
+    transition: background-color 0.4s ease;
+  }
+
+  button:hover {
+    background-color: #ddd;
   }
 
   .valid-word {
@@ -217,9 +239,14 @@
   <div class="validation-error">{validationError || ''}</div>
   <div class="current-word {validationError && 'current-word--error'}">{currentWord}</div>
   <div class="letter-box">
-    <div on:click={handleLetterClick(mainLetter)} class="letter letter--main">{mainLetter}</div>
+    <div on:click={handleLetterClick(mainLetter)} class="letter letter--main {lastActiveLetter === mainLetter && 'letter--active'}">{mainLetter}</div>
     {#each letters as letter, index (letter)}
-      <div animate:flip="{{ duration: 800 }}" on:click={handleLetterClick(letter)} class="letter letter--{index}">{letter}</div>
+      <div
+        animate:flip="{{ duration: 800 }}"
+        on:click={handleLetterClick(letter)}
+        class="letter letter--{index} {lastActiveLetter === letter && 'letter--active'}">
+        {letter}
+      </div>
     {/each}
   </div>
   <div class="button-group">
